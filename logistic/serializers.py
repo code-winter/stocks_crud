@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 
 from logistic.models import Product, Stock, StockProduct
@@ -40,11 +41,14 @@ class StockSerializer(serializers.ModelSerializer):
         positions = validated_data.pop('positions')
         stock = super().update(instance, validated_data)
         for item in positions:
+            quantity = item['quantity']
+            price = item['price']
             StockProduct.objects.update_or_create(
                 stock=stock,
                 product=item['product'],
-                quantity=item['quantity'],
-                price=item['price']
+                defaults={
+                    'quantity': quantity,
+                    'price': price
+                }
             )
-
         return stock
